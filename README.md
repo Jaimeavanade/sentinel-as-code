@@ -52,3 +52,4 @@ Using these samples you can add, update and remove different artifacts on Azure 
 ### **MITRE Use Cases**
 
 Using these samples, you can see a code organization considering different Azure Sentinel artifacts classified by different Azure Services as target. 
+Prueba de despliegue automático de Microsoft Sentinel
