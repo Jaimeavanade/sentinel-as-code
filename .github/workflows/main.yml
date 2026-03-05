@@ -11,15 +11,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Login to Azure
-      uses: azure/login@v2
-      with:
-        client-id: ${{ secrets.SENTINEL_CLIENTID }}
-        tenant-id: ${{ secrets.SENTINEL_TENANTID }}
-        subscription-id: ${{ secrets.SENTINEL_SUBSCRIPTIONID }}
-        audience: api://AzureADTokenExchange
-        enable-AzPSSession: true
-``
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.SENTINEL_CLIENTID }}
+          tenant-id: ${{ secrets.SENTINEL_TENANTID }}
+          subscription-id: ${{ secrets.SENTINEL_SUBSCRIPTIONID }}
+          audience: api://AzureADTokenExchange
+          enable-AzPSSession: true
