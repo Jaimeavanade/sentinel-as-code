@@ -21,6 +21,16 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
+# Normalización (quita espacios/saltos de línea invisibles)
+$ResourceGroup = $ResourceGroup.Trim()
+$Workspace     = $Workspace.Trim()
+$Region        = $Region.Trim()
+
+# Si Region viene en formato "France Central", avisamos
+if ($Region -match "\s") {
+  Write-Warning "REGION contiene espacios ('$Region'). En Azure suele ser 'francecentral', 'westeurope', etc."
+}
+
 Write-Host "== Set-SentinelContent.ps1 =="
 Write-Host "ResourceGroup: $ResourceGroup"
 Write-Host "Workspace:     $Workspace"
@@ -40,6 +50,12 @@ if (-not $ctx) { throw "No hay contexto Az (Get-AzContext vacío). ¿Falló azur
 
 $subscriptionId = $ctx.Subscription.Id
 Write-Host "SubscriptionId: $subscriptionId"
+
+
+Write-Host "Workspace(raw)='>$Workspace<'"
+Write-Host "ResourceGroup(raw)='>$ResourceGroup<'"
+Write-Host "Region(raw)='>$Region<
+
 
 # 3) Obtener el Workspace ResourceId
 $ws = Get-AzOperationalInsightsWorkspace -ResourceGroupName $ResourceGroup -Name $Workspace -ErrorAction Stop
