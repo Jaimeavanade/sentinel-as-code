@@ -1,4 +1,3 @@
-
 name: Deploy Sentinel Content
 
 on:
@@ -45,6 +44,6 @@ jobs:
               -ResourceGroup '${{ vars.RESOURCE_GROUP }}' `
               -Workspace '${{ vars.WORKSPACE_NAME }}' `
               -Region '${{ vars.REGION }}' `
-              -Solutions ${{ vars.SENTINEL_SOLUTIONS }} `
-              -SeveritiesToInclude ${{ vars.AR_SEVERITIES }} `
+              -Solutions '${{ vars.SENTINEL_SOLUTIONS }}' `
+              -SeveritiesToInclude '${{ vars.AR_SEVERITIES }}' `
               -IsGov 'false'
