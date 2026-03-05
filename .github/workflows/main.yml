@@ -40,6 +40,7 @@ jobs:
               throw "Script not found at: $scriptPath"
             }
 
+            # OJO: aquí tiene que ser & (NO &amp;)
             & $scriptPath `
               -ResourceGroup '${{ vars.RESOURCE_GROUP }}' `
               -Workspace '${{ vars.WORKSPACE_NAME }}' `
