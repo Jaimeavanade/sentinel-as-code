@@ -17,6 +17,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Check secrets presence (safe)
+        shell: bash
+        run: |
+          if [ -z "${{ secrets.SENTINEL_CLIENTID }}" ]; then echo "SENTINEL_CLIENTID missing/empty"; exit 1; else echo "SENTINEL_CLIENTID ok"; fi
+          if [ -z "${{ secrets.SENTINEL_TENANTID }}" ]; then echo "SENTINEL_TENANTID missing/empty"; exit 1; else echo "SENTINEL_TENANTID ok"; fi
+          if [ -z "${{ secrets.SENTINEL_SUBSCRIPTIONID }}" ]; then echo "SENTINEL_SUBSCRIPTIONID missing/empty"; exit 1; else echo "SENTINEL_SUBSCRIPTIONID ok"; fi
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
