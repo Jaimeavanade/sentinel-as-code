@@ -37,12 +37,28 @@ jobs:
       - name: Enable Sentinel Solutions and Alert Rules
         uses: azure/powershell@v1
         with:
+          azPSVersion: "latest"
+          errorActionPreference: "Stop"
           inlineScript: |
-            & "${{ github.workspace }}/Scripts/Set-SentinelContent.ps1" `
+            $ErrorActionPreference = "Stop"
+
+            Write-Host "GITHUB_WORKSPACE=$env:GITHUB_WORKSPACE"
+            Write-Host "Listing Scripts folder (if exists):"
+            if (Test-Path (Join-Path $env:GITHUB_WORKSPACE "Scripts")) {
+              Get-ChildItem (Join-Path $env:GITHUB_WORKSPACE "Scripts") -Force
+            } else {
+              Write-Host "Scripts folder NOT FOUND"
+            }
+
+            $scriptPath = Join-Path $env:GITHUB_WORKSPACE "Scripts/Set-SentinelContent.ps1"
+            if (-not (Test-Path $scriptPath)) {
+              throw "Script not found at: $scriptPath"
+            }
+
+            & $scriptPath `
               -ResourceGroup '${{ vars.RESOURCE_GROUP }}' `
               -Workspace '${{ vars.WORKSPACE_NAME }}' `
               -Region '${{ vars.REGION }}' `
               -Solutions ${{ vars.SENTINEL_SOLUTIONS }} `
               -SeveritiesToInclude ${{ vars.AR_SEVERITIES }} `
               -IsGov 'false'
-          azPSVersion: "latest"
