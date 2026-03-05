@@ -13,6 +13,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -32,16 +33,16 @@ jobs:
           subscription-id: ${{ secrets.SENTINEL_SUBSCRIPTIONID }}
           audience: api://AzureADTokenExchange
           enable-AzPSSession: true
-          
+
       - name: Enable Sentinel Solutions and Alert Rules
-              uses: azure/powershell@v1
-              with:
-                inlineScript: |
-                  & "${{ github.workspace }}/Scripts/Set-SentinelContent.ps1" `
-                    -ResourceGroup '${{ vars.RESOURCE_GROUP }}' `
-                    -Workspace '${{ vars.WORKSPACE_NAME }}' `
-                    -Region '${{ vars.REGION }}' `
-                    -Solutions ${{ vars.SENTINEL_SOLUTIONS }} `
-                    -SeveritiesToInclude ${{ vars.AR_SEVERITIES }} `
-                    -IsGov 'false'
-                azPSVersion: "latest"
+        uses: azure/powershell@v1
+        with:
+          inlineScript: |
+            & "${{ github.workspace }}/Scripts/Set-SentinelContent.ps1" `
+              -ResourceGroup '${{ vars.RESOURCE_GROUP }}' `
+              -Workspace '${{ vars.WORKSPACE_NAME }}' `
+              -Region '${{ vars.REGION }}' `
+              -Solutions ${{ vars.SENTINEL_SOLUTIONS }} `
+              -SeveritiesToInclude ${{ vars.AR_SEVERITIES }} `
+              -IsGov 'false'
+          azPSVersion: "latest"
