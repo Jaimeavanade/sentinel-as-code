@@ -8,11 +8,11 @@ param(
   [Parameter(Mandatory=$true)]
   [string]$Region,
 
-  # IMPORTANT: desde el workflow lo pasamos como string (coma-separado).
+  # Desde el workflow lo pasamos como string separado por comas
   [Parameter(Mandatory=$false)]
   [string]$Solutions = "",
 
-  # IMPORTANT: desde el workflow lo pasamos como string (coma-separado).
+  # Desde el workflow lo pasamos como string separado por comas
   [Parameter(Mandatory=$false)]
   [string]$SeveritiesToInclude = "High,Medium",
 
@@ -30,6 +30,10 @@ $Region        = $Region.Trim()
 $Solutions     = $Solutions.Trim()
 $SeveritiesToInclude = $SeveritiesToInclude.Trim()
 
+# Quita comillas “raras” (smart quotes) que suelen venir de copiar/pegar
+$Solutions = $Solutions.Replace("“","").Replace("”","").Replace('"','')
+$SeveritiesToInclude = $SeveritiesToInclude.Replace("“","").Replace("”","").Replace('"','')
+
 Write-Host "== Set-SentinelContent.ps1 =="
 Write-Host "ResourceGroup: $ResourceGroup"
 Write-Host "Workspace:     $Workspace"
@@ -38,39 +42,33 @@ Write-Host "Solutions(raw):     >$Solutions<"
 Write-Host "Severities(raw):    >$SeveritiesToInclude<"
 Write-Host "IsGov:         $IsGov"
 
-# Si Region viene en formato "France Central", avisamos
 if ($Region -match "\s") {
-  Write-Warning "REGION contiene espacios ('$Region'). En Azure suele ser 'francecentral', 'westeurope', etc."
+  Write-Warning "REGION contiene espacios ('$Region'). Usa el location name: francecentral, westeurope, etc."
 }
 
-# 1) Comprobar contexto Az
-if (-not (Get-Module -ListAvailable -Name Az.Accounts)) {
-  throw "Az modules no disponibles. azure/powershell debería cargarlos automáticamente."
-}
-
-# 2) Obtener subscription actual (viene del azure/login)
+# Contexto Az (de azure/login)
 $ctx = Get-AzContext
 if (-not $ctx) { throw "No hay contexto Az (Get-AzContext vacío). ¿Falló azure/login?" }
 
 $subscriptionId = $ctx.Subscription.Id
 Write-Host "SubscriptionId: $subscriptionId"
 
-# 3) Obtener el Workspace ResourceId
+# Obtener Workspace ResourceId
 $ws = Get-AzOperationalInsightsWorkspace -ResourceGroupName $ResourceGroup -Name $Workspace -ErrorAction Stop
 $workspaceId = $ws.ResourceId
 Write-Host "WorkspaceId: $workspaceId"
 
-# 4) Parsear severities
+# Parseo de severidades
 $sevList = @()
 if (-not [string]::IsNullOrWhiteSpace($SeveritiesToInclude)) {
-  $sevList = $SeveritiesToInclude.Split(",") | ForEach-Object { $_.Trim().Trim('"') } | Where-Object { $_ }
+  $sevList = $SeveritiesToInclude.Split(",") | ForEach-Object { $_.Trim() } | Where-Object { $_ }
 }
 Write-Host "Severities(parsed): $($sevList -join ', ')"
 
-# 5) Parsear soluciones (coma-separado)
+# Parseo de soluciones
 $solutionList = @()
 if (-not [string]::IsNullOrWhiteSpace($Solutions)) {
-  $solutionList = $Solutions.Split(",") | ForEach-Object { $_.Trim().Trim('"') } | Where-Object { $_ }
+  $solutionList = $Solutions.Split(",") | ForEach-Object { $_.Trim() } | Where-Object { $_ }
 }
 
 if ($solutionList.Count -eq 0) {
@@ -85,12 +83,11 @@ foreach ($solutionName in $solutionList) {
   Write-Host ""
   Write-Host "==> Installing/Updating solution: $solutionName"
 
-  # Nombre del recurso "solution" (debe ser único en el RG)
   $resourceName = "SentinelSolution-$($solutionName -replace '[^a-zA-Z0-9\-]', '-')"
 
-  # Endpoint ARM (método genérico OMSGallery)
+  # IMPORTANTE: usar ${resourceName} para que PowerShell NO interprete $resourceName?api como variable
   $apiVersion = "2015-11-01-preview"
-  $uri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$ResourceGroup/providers/Microsoft.OperationsManagement/solutions/$resourceName?api-version=$apiVersion"
+  $uri = "https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$ResourceGroup/providers/Microsoft.OperationsManagement/solutions/${resourceName}?api-version=$apiVersion"
 
   $body = @{
     location   = $Region
